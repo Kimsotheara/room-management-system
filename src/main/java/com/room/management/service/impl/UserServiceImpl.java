@@ -1,8 +1,7 @@
 package com.room.management.service.impl;
 
-import com.room.management.dto.request.AssignRoleRequestDto;
-import com.room.management.dto.request.CreateUserRequestDto;
-import com.room.management.dto.request.UpdateUserRequestDto;
+import com.room.management.dto.request.*;
+import com.room.management.dto.response.PageAbleResponse;
 import com.room.management.dto.response.UserResponseDto;
 import com.room.management.entity.auth.Role;
 import com.room.management.entity.auth.User;
@@ -16,12 +15,11 @@ import com.room.management.repository.UserRoleRepository;
 import com.room.management.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -36,10 +34,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserResponseDto> getAll() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDto)
-                .toList();
+    public PageAbleResponse<User, UserResponseDto, Void> getUsersWithFilter(PageAbleRequest<UserRequestDto> request) {
+        log.info("Fetching users with filter and pagination");
+        Page<User> page = userRepository.findAllWithFilter(request);
+        return PageAbleResponse.withoutAddition(page, userMapper.toPagingUser(page.getContent()));
     }
 
     @Override
