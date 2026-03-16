@@ -3,12 +3,13 @@ package com.room.management.dto.request;
 import lombok.Data;
 
 @Data
-public class UserRequestDto {
+public class GuestRequestDto {
 
-    private String username;
+    private String firstName;
+    private String lastName;
     private String email;
-    private String fullName;
     private String phoneNumber;
+    private String nationality;
+    private String identityType;
     private Boolean isActive;
-    private Long roleId;
 }

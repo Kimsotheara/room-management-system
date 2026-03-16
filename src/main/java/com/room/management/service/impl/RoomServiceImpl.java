@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -100,14 +101,13 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public RoomResponseDto addImages(Long roomId, List<String> images) {
         Rooms room = findRoomById(roomId);
-
         int nextOrder = roomImageRepository.countByRoomIdAndIsActiveTrue(roomId);
 
         List<RoomImages> roomImages = new ArrayList<>();
         for (int i = 0; i < images.size(); i++) {
             RoomImages image = new RoomImages();
             image.setRoom(room);
-            image.setImageData(images.get(i));
+            image.setImageData(Base64.getDecoder().decode(images.get(i)));
             image.setDisplayOrder(nextOrder + i);
             image.setIsActive(true);
             roomImages.add(image);
@@ -129,6 +129,13 @@ public class RoomServiceImpl implements RoomService {
         image.setIsActive(false);
         roomImageRepository.save(image);
         log.info("Image {} removed from room {}", imageId, roomId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] getImage(Long roomId, Long imageId) {
+        return roomImageRepository.findImageDataById(imageId)
+                .orElseThrow(() -> new ResourceNotFoundException("RoomImage", imageId));
     }
 
     private Rooms findRoomById(Long id) {

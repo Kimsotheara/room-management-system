@@ -86,5 +86,3 @@ app:
       fail-on-error: false
       update-existing: true
       default-resource-category: API_ENDPOINT
-  upload:
-    dir: ${APP_UPLOAD_DIR:uploads}

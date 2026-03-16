@@ -44,7 +44,7 @@ public abstract class UserMapper {
     }
 
     public List<UserResponseDto> toPagingUser(List<User> users) {
-        return users.stream().map(this::toDto).collect(Collectors.toList());
+        return users.stream().map(this::toDto).toList();
     }
 
     // ── Request DTO → Entity ───────────────────────────────────────────────

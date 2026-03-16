@@ -32,5 +32,7 @@ public class UpdateGuestRequestDto {
     @Size(max = 500, message = "Address must not exceed 500 characters")
     private String address;
 
+    private String profileImage;
+
     private Boolean isActive;
 }

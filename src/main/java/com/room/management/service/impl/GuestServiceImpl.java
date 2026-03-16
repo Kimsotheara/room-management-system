@@ -1,8 +1,11 @@
 package com.room.management.service.impl;
 
 import com.room.management.dto.request.CreateGuestRequestDto;
+import com.room.management.dto.request.GuestRequestDto;
+import com.room.management.dto.request.PageAbleRequest;
 import com.room.management.dto.request.UpdateGuestRequestDto;
 import com.room.management.dto.response.GuestResponseDto;
+import com.room.management.dto.response.PageAbleResponse;
 import com.room.management.entity.room.Guests;
 import com.room.management.exception.DuplicateResourceException;
 import com.room.management.exception.ResourceNotFoundException;
@@ -11,10 +14,12 @@ import com.room.management.repository.GuestRepository;
 import com.room.management.service.GuestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +36,14 @@ public class GuestServiceImpl implements GuestService {
         return guestRepository.findAll().stream()
                 .map(guestMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageAbleResponse<Guests, GuestResponseDto, Void> getGuestsWithFilter(PageAbleRequest<GuestRequestDto> request) {
+        log.info("Fetching guests with filter and pagination");
+        Page<Guests> page = guestRepository.findAllWithFilter(request);
+        return PageAbleResponse.withoutAddition(page, guestMapper.toPagingGuest(page.getContent()));
     }
 
     @Override
@@ -53,6 +66,9 @@ public class GuestServiceImpl implements GuestService {
 
         Guests guest = guestMapper.toEntity(request);
         guest.setIsActive(true);
+        if (StringUtils.hasText(request.getProfileImage())) {
+            guest.setProfileImage(Base64.getDecoder().decode(request.getProfileImage()));
+        }
 
         Guests saved = guestRepository.save(guest);
         log.info("Guest created: {} {}", saved.getFirstName(), saved.getLastName());
@@ -76,6 +92,9 @@ public class GuestServiceImpl implements GuestService {
         }
 
         guestMapper.updateEntity(request, guest);
+        if (StringUtils.hasText(request.getProfileImage())) {
+            guest.setProfileImage(Base64.getDecoder().decode(request.getProfileImage()));
+        }
 
         Guests saved = guestRepository.save(guest);
         log.info("Guest updated: {} {}", saved.getFirstName(), saved.getLastName());
@@ -92,22 +111,10 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
-    @Transactional
-    public GuestResponseDto uploadProfileImage(Long id, String imageData) {
-        Guests guest = findGuestById(id);
-        guest.setProfileImage(imageData);
-        Guests saved = guestRepository.save(guest);
-        log.info("Profile image updated for guest: {} {}", saved.getFirstName(), saved.getLastName());
-        return guestMapper.toDto(saved);
-    }
-
-    @Override
-    @Transactional
-    public void deleteProfileImage(Long id) {
-        Guests guest = findGuestById(id);
-        guest.setProfileImage(null);
-        guestRepository.save(guest);
-        log.info("Profile image removed for guest: {} {}", guest.getFirstName(), guest.getLastName());
+    @Transactional(readOnly = true)
+    public byte[] getProfileImage(Long id) {
+        return guestRepository.findProfileImageById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest", id));
     }
 
     private Guests findGuestById(Long id) {

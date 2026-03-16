@@ -2,6 +2,8 @@ package com.room.management.controller;
 
 import com.room.management.annotation.AuthResource;
 import com.room.management.dto.request.CreateGuestRequestDto;
+import com.room.management.dto.request.GuestRequestDto;
+import com.room.management.dto.request.PageAbleRequest;
 import com.room.management.dto.request.UpdateGuestRequestDto;
 import com.room.management.dto.response.ApiResponse;
 import com.room.management.dto.response.GuestResponseDto;
@@ -14,10 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -34,6 +33,13 @@ public class GuestController {
     @Operation(summary = "List all guests")
     public ResponseEntity<ApiResponse<List<GuestResponseDto>>> getAll() {
         return ResponseEntity.ok(ApiResponse.success(guestService.getAll()));
+    }
+
+    @PostMapping("/list/filter")
+    @AuthResource(value = "filter-guests", description = "Get guests with optional filter and pagination")
+    @Operation(summary = "Get guests with filter", description = "Filter by firstName, lastName, email, phoneNumber, nationality, identityType, isActive. All fields are optional.")
+    public ResponseEntity<ApiResponse<?>> getGuestsWithFilter(@RequestBody PageAbleRequest<GuestRequestDto> request) {
+        return ResponseEntity.ok(ApiResponse.success(guestService.getGuestsWithFilter(request)));
     }
 
     @GetMapping("/{id}")
@@ -68,22 +74,13 @@ public class GuestController {
         return ResponseEntity.ok(ApiResponse.success("Guest deleted successfully", null));
     }
 
-    @PutMapping(value = "/{id}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @AuthResource(value = "upload-guest-profile-image", description = "Upload guest profile image")
-    @Operation(summary = "Upload profile image", description = "Upload or replace the guest profile image (JPEG, PNG, WEBP, GIF)")
-    public ResponseEntity<ApiResponse<GuestResponseDto>> uploadProfileImage(
-            @PathVariable Long id,
-            @RequestParam("file") MultipartFile file) throws IOException {
-        String base64Image = Base64.getEncoder().encodeToString(file.getBytes());
-        return ResponseEntity.ok(ApiResponse.success("Profile image uploaded successfully",
-                guestService.uploadProfileImage(id, base64Image)));
-    }
-
-    @DeleteMapping("/{id}/profile-image")
-    @AuthResource(value = "delete-guest-profile-image", description = "Delete guest profile image")
-    @Operation(summary = "Delete profile image")
-    public ResponseEntity<ApiResponse<Void>> deleteProfileImage(@PathVariable Long id) {
-        guestService.deleteProfileImage(id);
-        return ResponseEntity.ok(ApiResponse.success("Profile image removed successfully", null));
+    @GetMapping("/{id}/profile-image")
+    @AuthResource(value = "get-guest-profile-image", description = "Get guest profile image")
+    @Operation(summary = "Get guest profile image")
+    public ResponseEntity<byte[]> getProfileImage(@PathVariable Long id) {
+        byte[] data = guestService.getProfileImage(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(data);
     }
 }

@@ -21,4 +21,6 @@ public interface RoomService {
     RoomResponseDto addImages(Long roomId, List<String> images);
 
     void deleteImage(Long roomId, Long imageId);
+
+    byte[] getImage(Long roomId, Long imageId);
 }
