@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,5 +85,17 @@ public class RoomController {
             @PathVariable Long imageId) {
         roomService.deleteImage(id, imageId);
         return ResponseEntity.ok(ApiResponse.success("Image deleted successfully", null));
+    }
+
+    @GetMapping("/{id}/images/{imageId}/file")
+    @AuthResource(value = "get-room-image-file", description = "Get room image file")
+    @Operation(summary = "Get room image file")
+    public ResponseEntity<byte[]> getImageFile(
+            @PathVariable Long id,
+            @PathVariable Long imageId) {
+        byte[] data = roomService.getImage(id, imageId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE)
+                .body(data);
     }
 }

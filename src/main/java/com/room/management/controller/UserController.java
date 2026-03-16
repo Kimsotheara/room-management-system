@@ -1,9 +1,7 @@
 package com.room.management.controller;
 
 import com.room.management.annotation.AuthResource;
-import com.room.management.dto.request.AssignRoleRequestDto;
-import com.room.management.dto.request.CreateUserRequestDto;
-import com.room.management.dto.request.UpdateUserRequestDto;
+import com.room.management.dto.request.*;
 import com.room.management.dto.response.ApiResponse;
 import com.room.management.dto.response.UserResponseDto;
 import com.room.management.service.UserService;
@@ -15,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -26,11 +22,11 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping
-    @AuthResource(value = "list-users", description = "List all users")
-    @Operation(summary = "List all users")
-    public ResponseEntity<ApiResponse<List<UserResponseDto>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.success(userService.getAll()));
+    @PostMapping("/list/filter")
+    @AuthResource(value = "filter-users", description = "Get users with optional filter and pagination")
+    @Operation(summary = "Get users with filter", description = "Filter by username, email, fullName, phoneNumber, isActive, roleId. All fields are optional; omit or send null to get all users.")
+    public ResponseEntity<ApiResponse<?>> getUsersWithFilter(@RequestBody PageAbleRequest<UserRequestDto> request) {
+        return ResponseEntity.ok(ApiResponse.success(userService.getUsersWithFilter(request)));
     }
 
     @GetMapping("/{id}")

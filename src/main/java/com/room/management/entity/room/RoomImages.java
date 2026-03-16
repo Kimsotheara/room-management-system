@@ -20,8 +20,10 @@ public class RoomImages extends BaseEntity {
     @JoinColumn(name = "room_id", nullable = false)
     private Rooms room;
 
-    @Column(name = "image_data", nullable = false, columnDefinition = "TEXT")
-    private String imageData;
+    @Lob
+    @Basic(fetch = FetchType.LAZY) // Important for performance
+    @Column(name = "image_data", nullable = false)
+    private byte[] imageData;
 
     @Column(name = "display_order")
     private Integer displayOrder = 0;

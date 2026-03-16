@@ -15,6 +15,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,10 @@ public abstract class UserMapper {
                 .map(roleMapper::toDto)
                 .collect(Collectors.toSet());
         dto.roles(roles);
+    }
+
+    public List<UserResponseDto> toPagingUser(List<User> users) {
+        return users.stream().map(this::toDto).toList();
     }
 
     // ── Request DTO → Entity ───────────────────────────────────────────────

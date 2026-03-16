@@ -40,8 +40,10 @@ public class Guests extends BaseEntity {
     @Column(name = "address", length = 500)
     private String address;
 
-    @Column(name = "profile_image", columnDefinition = "TEXT")
-    private String profileImage;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "profile_image")
+    private byte[] profileImage;
 
     @Column(name = "is_active", columnDefinition = "boolean default true")
     private Boolean isActive = true;
