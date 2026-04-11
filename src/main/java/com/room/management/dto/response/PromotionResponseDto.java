@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,6 +19,7 @@ public class PromotionResponseDto {
     private LocalDateTime effectiveDate;
     private LocalDateTime expireDate;
     private Boolean isActive;
+    private List<RoomTypeResponseDto> roomTypes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,6 +1,7 @@
 package com.room.management.entity.room;
 
 import com.room.management.entity.auth.BaseEntity;
+import com.room.management.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,8 +28,9 @@ public class Rooms extends BaseEntity {
     @JoinColumn(name = "room_type_id", nullable = false)
     private RoomTypes roomTypes;
 
-    @Column(name = "room_status", length = 50)
-    private String roomStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "room_status", length = 20)
+    private RoomStatus roomStatus;
 
     @Column(name = "is_active", columnDefinition = "boolean default true")
     private Boolean isActive = true;

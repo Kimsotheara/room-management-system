@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/promotion")
+@RequestMapping("/api/promotions")
 @RequiredArgsConstructor
 @Tag(name = "Promotion Management", description = "CRUD operations for Promotion")
 @AuthResource(value = "promotion-management", category = "PROMOTION")
@@ -25,10 +25,9 @@ public class PromotionController {
 
     private final PromotionService promotionService;
 
-
     @GetMapping
-    @AuthResource(value = "list-promotion", description = "List all promotion")
-    @Operation(summary = "List all promotion")
+    @AuthResource(value = "list-promotions", description = "List all promotions")
+    @Operation(summary = "List all promotions")
     public ResponseEntity<ApiResponse<List<PromotionResponseDto>>> getAll() {
         return ResponseEntity.ok(ApiResponse.success(promotionService.getAllPromotions()));
     }
@@ -43,9 +42,10 @@ public class PromotionController {
     @PostMapping
     @AuthResource(value = "create-promotion", description = "Create new promotion")
     @Operation(summary = "Create new promotion")
-    public ResponseEntity<ApiResponse<PromotionResponseDto>> create(@Valid @RequestBody CreatePromotionRequestDto request) {
+    public ResponseEntity<ApiResponse<PromotionResponseDto>> create(
+            @Valid @RequestBody CreatePromotionRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("promotion created successfully", promotionService.create(request)));
+                .body(ApiResponse.success("Promotion created successfully", promotionService.create(request)));
     }
 
     @PutMapping("/{id}")
@@ -54,7 +54,7 @@ public class PromotionController {
     public ResponseEntity<ApiResponse<PromotionResponseDto>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePromotionRequestDto request) {
-        return ResponseEntity.ok(ApiResponse.success("promotion updated successfully", promotionService.update(id, request)));
+        return ResponseEntity.ok(ApiResponse.success("Promotion updated successfully", promotionService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
@@ -62,7 +62,6 @@ public class PromotionController {
     @Operation(summary = "Delete promotion (soft delete)")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         promotionService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("promotion deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Promotion deleted successfully", null));
     }
-
 }

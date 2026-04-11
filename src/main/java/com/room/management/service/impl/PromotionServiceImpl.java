@@ -38,25 +38,21 @@ public class PromotionServiceImpl implements PromotionService {
         return promotionMapper.toDto(findById(id));
     }
 
-
     @Override
     @Transactional
     public PromotionResponseDto create(CreatePromotionRequestDto request) {
-
-        if(promotionRepository.existsByName(request.getName())){
+        if (promotionRepository.existsByName(request.getName())) {
             throw new DuplicateResourceException("Promotion", "name", request.getName());
         }
 
         Promotions obj = promotionRepository.save(promotionMapper.toEntity(request));
         log.info("Promotion created: {}", obj.getName());
-
         return promotionMapper.toDto(obj);
     }
 
     @Override
     @Transactional
     public PromotionResponseDto update(Long id, UpdatePromotionRequestDto request) {
-
         Promotions obj = findById(id);
 
         if (StringUtils.hasText(request.getName())
@@ -66,24 +62,24 @@ public class PromotionServiceImpl implements PromotionService {
         }
 
         promotionMapper.updateEntity(request, obj);
-        Promotions updatedObj = promotionRepository.save(obj);
-        log.info("Promotion updated: {}", updatedObj.getName());
-        return promotionMapper.toDto(updatedObj);
+        Promotions updated = promotionRepository.save(obj);
+        log.info("Promotion updated: {}", updated.getName());
+        return promotionMapper.toDto(updated);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-
-        Promotions promotions = findById(id);
-        promotions.setIsActive(false);
-        promotionRepository.save(promotions);
-        log.info("Promotion deactivated: {}", promotions.getName());
-
+        Promotions promotion = findById(id);
+        promotion.setIsActive(false);
+        promotionRepository.save(promotion);
+        log.info("Promotion deactivated: {}", promotion.getName());
     }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
 
     private Promotions findById(Long id) {
         return promotionRepository.findById(id)
-                 .orElseThrow(() -> new ResourceNotFoundException("Promotion", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Promotion", id));
     }
 }
