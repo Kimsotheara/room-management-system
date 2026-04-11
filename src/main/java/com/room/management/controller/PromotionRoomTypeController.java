@@ -1,11 +1,13 @@
 package com.room.management.controller;
 
 import com.room.management.annotation.AuthResource;
+import com.room.management.dto.request.AssignPromotionRoomTypeRequestDto;
 import com.room.management.dto.response.ApiResponse;
 import com.room.management.dto.response.PromotionRoomTypeResponseDto;
 import com.room.management.service.PromotionRoomTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,19 +39,18 @@ public class PromotionRoomTypeController {
         return ResponseEntity.ok(ApiResponse.success(promotionRoomTypeService.getById(id)));
     }
 
-    @PostMapping("/promotion/{promotionId}")
-    @AuthResource(value = "assign-promotion-room-types", description = "Assign room types to a promotion")
+    @PostMapping
+    @AuthResource(value = "prt-assign", description = "Assign room types to a promotion")
     @Operation(summary = "Assign room types", description = "Assigns one or more room types to a promotion. Already assigned types are skipped.")
     public ResponseEntity<ApiResponse<List<PromotionRoomTypeResponseDto>>> assign(
-            @PathVariable Long promotionId,
-            @RequestBody List<Long> roomTypeIds) {
+            @Valid @RequestBody AssignPromotionRoomTypeRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Room types assigned successfully",
-                        promotionRoomTypeService.assign(promotionId, roomTypeIds)));
+                        promotionRoomTypeService.assign(request)));
     }
 
     @DeleteMapping("/{id}")
-    @AuthResource(value = "remove-promotion-room-type", description = "Remove a room type from a promotion")
+    @AuthResource(value = "prt-remove", description = "Remove a room type from a promotion")
     @Operation(summary = "Remove room type", description = "Soft deletes the promotion-room type assignment by its own ID.")
     public ResponseEntity<ApiResponse<Void>> remove(@PathVariable Long id) {
         promotionRoomTypeService.remove(id);

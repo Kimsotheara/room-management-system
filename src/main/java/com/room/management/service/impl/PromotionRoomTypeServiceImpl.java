@@ -1,5 +1,6 @@
 package com.room.management.service.impl;
 
+import com.room.management.dto.request.AssignPromotionRoomTypeRequestDto;
 import com.room.management.dto.response.PromotionRoomTypeResponseDto;
 import com.room.management.entity.room.PromotionRoomType;
 import com.room.management.entity.room.Promotions;
@@ -46,12 +47,12 @@ public class PromotionRoomTypeServiceImpl implements PromotionRoomTypeService {
 
     @Override
     @Transactional
-    public List<PromotionRoomTypeResponseDto> assign(Long promotionId, List<Long> roomTypeIds) {
-        Promotions promotion = promotionRepository.findById(promotionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Promotion", promotionId));
+    public List<PromotionRoomTypeResponseDto> assign(AssignPromotionRoomTypeRequestDto request) {
+        Promotions promotion = promotionRepository.findById(request.getPromotionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Promotion", request.getPromotionId()));
 
         List<PromotionRoomType> toSave = new ArrayList<>();
-        for (Long roomTypeId : roomTypeIds) {
+        for (Long roomTypeId : request.getRoomTypeIds()) {
             RoomTypes roomType = roomTypeRepository.findById(roomTypeId)
                     .orElseThrow(() -> new ResourceNotFoundException("RoomType", roomTypeId));
 
@@ -71,7 +72,7 @@ public class PromotionRoomTypeServiceImpl implements PromotionRoomTypeService {
         log.info("{} room type(s) assigned to promotion: {}", toSave.size(), promotion.getName());
 
         return promotionRoomTypeMapper.toDtoList(
-                promotionRoomTypeRepository.findActiveByPromotionId(promotionId));
+                promotionRoomTypeRepository.findActiveByPromotionId(request.getPromotionId()));
     }
 
     @Override
