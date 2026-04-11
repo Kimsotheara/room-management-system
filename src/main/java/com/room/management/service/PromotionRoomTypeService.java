@@ -1,5 +1,6 @@
 package com.room.management.service;
 
+import com.room.management.dto.request.AssignPromotionRoomTypeRequestDto;
 import com.room.management.dto.response.PromotionRoomTypeResponseDto;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public interface PromotionRoomTypeService {
 
     PromotionRoomTypeResponseDto getById(Long id);
 
-    List<PromotionRoomTypeResponseDto> assign(Long promotionId, List<Long> roomTypeIds);
+    List<PromotionRoomTypeResponseDto> assign(AssignPromotionRoomTypeRequestDto request);
 
     void remove(Long id);
 }
