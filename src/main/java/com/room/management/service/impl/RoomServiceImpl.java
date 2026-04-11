@@ -6,6 +6,7 @@ import com.room.management.dto.response.RoomResponseDto;
 import com.room.management.entity.room.RoomImages;
 import com.room.management.entity.room.RoomTypes;
 import com.room.management.entity.room.Rooms;
+import com.room.management.enums.RoomStatus;
 import com.room.management.exception.DuplicateResourceException;
 import com.room.management.exception.ResourceNotFoundException;
 import com.room.management.mapper.RoomMapper;
@@ -58,7 +59,7 @@ public class RoomServiceImpl implements RoomService {
 
         Rooms room = roomMapper.toEntity(request);
         room.setRoomTypes(roomType);
-        room.setRoomStatus(StringUtils.hasText(request.getRoomStatus()) ? request.getRoomStatus() : "AVAILABLE");
+        room.setRoomStatus(parseRoomStatus(request.getRoomStatus(), RoomStatus.AVAILABLE));
         room.setIsActive(true);
 
         Rooms saved = roomRepository.save(room);
@@ -82,6 +83,10 @@ public class RoomServiceImpl implements RoomService {
         }
 
         roomMapper.updateEntity(request, room);
+
+        if (StringUtils.hasText(request.getRoomStatus())) {
+            room.setRoomStatus(parseRoomStatus(request.getRoomStatus(), null));
+        }
 
         Rooms saved = roomRepository.save(room);
         log.info("Room updated: {}", saved.getRoomNumber());
@@ -136,6 +141,15 @@ public class RoomServiceImpl implements RoomService {
     public byte[] getImage(Long roomId, Long imageId) {
         return roomImageRepository.findImageDataById(imageId)
                 .orElseThrow(() -> new ResourceNotFoundException("RoomImage", imageId));
+    }
+
+    private RoomStatus parseRoomStatus(String value, RoomStatus defaultStatus) {
+        if (!StringUtils.hasText(value)) return defaultStatus;
+        try {
+            return RoomStatus.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid room status: '" + value + "'. Valid values: AVAILABLE, RESERVED, OCCUPIED, MAINTENANCE");
+        }
     }
 
     private Rooms findRoomById(Long id) {

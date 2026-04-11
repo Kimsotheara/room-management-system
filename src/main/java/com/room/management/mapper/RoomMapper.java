@@ -24,10 +24,12 @@ public interface RoomMapper {
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "roomTypes", ignore = true)
     @Mapping(target = "roomImages", ignore = true)
+    @Mapping(target = "roomStatus", ignore = true)
     Rooms toEntity(CreateRoomRequestDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "roomTypes", ignore = true)
     @Mapping(target = "roomImages", ignore = true)
+    @Mapping(target = "roomStatus", ignore = true)
     void updateEntity(UpdateRoomRequestDto dto, @MappingTarget Rooms room);
 }
