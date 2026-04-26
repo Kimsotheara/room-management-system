@@ -2,7 +2,6 @@ package com.room.management.controller;
 
 import com.room.management.annotation.AuthResource;
 import com.room.management.dto.request.CreateReservationRequestDto;
-import com.room.management.dto.request.PaymentRequestDto;
 import com.room.management.dto.request.UpdateReservationRequestDto;
 import com.room.management.dto.response.ApiResponse;
 import com.room.management.dto.response.InvoiceResponseDto;
@@ -77,15 +76,6 @@ public class ReservationController {
     @Operation(summary = "Cancel reservation", description = "Cancels a CONFIRMED or CHECKED_IN reservation.")
     public ResponseEntity<ApiResponse<ReservationResponseDto>> cancel(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("Reservation cancelled successfully", reservationService.cancel(id)));
-    }
-
-    @PostMapping("/{id}/payments")
-    @AuthResource(value = "add-reservation-payment", description = "Add payment to a reservation")
-    @Operation(summary = "Add payment", description = "Adds a payment amount and auto-updates paymentStatus (UNPAID → PARTIAL → PAID).")
-    public ResponseEntity<ApiResponse<ReservationResponseDto>> addPayment(
-            @PathVariable Long id,
-            @Valid @RequestBody PaymentRequestDto request) {
-        return ResponseEntity.ok(ApiResponse.success("Payment recorded successfully", reservationService.addPayment(id, request)));
     }
 
     @GetMapping("/{id}/invoice")

@@ -36,6 +36,9 @@ public class InvoiceResponseDto {
     private List<ServiceLineDto> serviceCharges;
     private BigDecimal serviceChargeTotal;
 
+    // Payment history
+    private List<PaymentLineDto> payments;
+
     // Payment summary
     private BigDecimal totalAmount;
     private BigDecimal paidAmount;
@@ -62,5 +65,15 @@ public class InvoiceResponseDto {
         private int quantity;
         private BigDecimal unitPrice;
         private BigDecimal totalPrice;
+    }
+
+    @Data
+    @Builder
+    public static class PaymentLineDto {
+        private Long id;
+        private String paymentMethod;
+        private String paymentType;
+        private BigDecimal amount;
+        private LocalDateTime paymentDate;
     }
 }

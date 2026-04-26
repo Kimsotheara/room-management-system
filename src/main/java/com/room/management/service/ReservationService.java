@@ -1,7 +1,6 @@
 package com.room.management.service;
 
 import com.room.management.dto.request.CreateReservationRequestDto;
-import com.room.management.dto.request.PaymentRequestDto;
 import com.room.management.dto.request.UpdateReservationRequestDto;
 import com.room.management.dto.response.InvoiceResponseDto;
 import com.room.management.dto.response.ReservationResponseDto;
@@ -23,8 +22,6 @@ public interface ReservationService {
     ReservationResponseDto checkOut(Long id);
 
     ReservationResponseDto cancel(Long id);
-
-    ReservationResponseDto addPayment(Long id, PaymentRequestDto request);
 
     InvoiceResponseDto getInvoice(Long id);
 
