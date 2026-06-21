@@ -62,7 +62,7 @@ public class ReportServiceImpl implements ReportService {
 
         // Current month revenue
         LocalDateTime monthStart = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-        Object[] monthly = reservationRepository.revenueByDateRange(monthStart, endOfDay);
+        Object[] monthly = firstRow(reservationRepository.revenueByDateRange(monthStart, endOfDay));
         BigDecimal monthlyRevenue = asBigDecimal(monthly[0]);
         BigDecimal monthlyPaid = asBigDecimal(monthly[1]);
         BigDecimal monthlyBalance = asBigDecimal(monthly[2]);
@@ -95,7 +95,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDateTime fromDt = from.atStartOfDay();
         LocalDateTime toDt = to.plusDays(1).atStartOfDay();
 
-        Object[] row = reservationRepository.revenueByDateRange(fromDt, toDt);
+        Object[] row = firstRow(reservationRepository.revenueByDateRange(fromDt, toDt));
         BigDecimal totalRevenue = asBigDecimal(row[0]);
         BigDecimal totalPaid = asBigDecimal(row[1]);
         BigDecimal totalBalance = asBigDecimal(row[2]);
@@ -156,5 +156,9 @@ public class ReportServiceImpl implements ReportService {
 
     private BigDecimal asBigDecimal(Object value) {
         return value instanceof BigDecimal bd ? bd : BigDecimal.ZERO;
+    }
+
+    private Object[] firstRow(List<Object[]> rows) {
+        return rows.isEmpty() ? new Object[4] : rows.get(0);
     }
 }

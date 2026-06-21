@@ -64,7 +64,7 @@ public interface ReservationRepository extends JpaRepository<Reservations, Long>
               AND r.status != com.room.management.enums.ReservationStatus.CANCELLED
               AND r.checkInDate >= :from AND r.checkInDate < :to
             """)
-    Object[] revenueByDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+    List<Object[]> revenueByDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
     @Query("""
             SELECT r.status, COUNT(r)
