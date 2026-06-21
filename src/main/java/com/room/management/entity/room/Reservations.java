@@ -68,6 +68,10 @@ public class Reservations extends BaseEntity {
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ServiceUsages> serviceUsages = new ArrayList<>();
 
+    @BatchSize(size = 30)
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Payments> payments = new ArrayList<>();
+
     public List<ReservationRooms> getActiveRooms() {
         return reservationRooms.stream()
                 .filter(rr -> Boolean.TRUE.equals(rr.getIsActive()))
@@ -77,6 +81,12 @@ public class Reservations extends BaseEntity {
     public List<ServiceUsages> getActiveServiceUsages() {
         return serviceUsages.stream()
                 .filter(su -> Boolean.TRUE.equals(su.getIsActive()))
+                .toList();
+    }
+
+    public List<Payments> getActivePayments() {
+        return payments.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
                 .toList();
     }
 }

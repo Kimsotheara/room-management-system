@@ -20,4 +20,7 @@ public interface RoomRepository extends JpaRepository<Rooms, Long> {
     @Modifying
     @Query("UPDATE Rooms r SET r.roomStatus = :status WHERE r.id IN :ids")
     void updateStatusByIds(@Param("ids") List<Long> ids, @Param("status") RoomStatus status);
+
+    @Query("SELECT r.roomStatus, COUNT(r) FROM Rooms r WHERE r.isActive = true GROUP BY r.roomStatus")
+    List<Object[]> countActiveByStatus();
 }

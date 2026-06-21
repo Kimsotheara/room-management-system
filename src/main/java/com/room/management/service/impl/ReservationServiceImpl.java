@@ -1,7 +1,6 @@
 package com.room.management.service.impl;
 
 import com.room.management.dto.request.CreateReservationRequestDto;
-import com.room.management.dto.request.PaymentRequestDto;
 import com.room.management.dto.request.ReservationRoomRequestDto;
 import com.room.management.dto.request.UpdateReservationRequestDto;
 import com.room.management.dto.response.InvoiceResponseDto;
@@ -96,6 +95,11 @@ public class ReservationServiceImpl implements ReservationService {
 
             if (!Boolean.TRUE.equals(room.getIsActive())) {
                 throw new IllegalArgumentException("Room " + room.getRoomNumber() + " is not active");
+            }
+
+            if (room.getRoomStatus() == RoomStatus.MAINTENANCE || room.getRoomStatus() == RoomStatus.CLEANING) {
+                throw new IllegalArgumentException(
+                        "Room " + room.getRoomNumber() + " is not available for booking. Status: " + room.getRoomStatus());
             }
 
             long overlaps = reservationRoomRepository.countOverlappingReservations(
@@ -239,34 +243,6 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    @Transactional
-    public ReservationResponseDto addPayment(Long id, PaymentRequestDto request) {
-        Reservations reservation = findById(id);
-
-        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new IllegalArgumentException("Cannot add payment to a cancelled reservation");
-        }
-        if (reservation.getPaymentStatus() == PaymentStatus.PAID) {
-            throw new IllegalArgumentException("Reservation is already fully paid");
-        }
-
-        BigDecimal newPaidAmount = reservation.getPaidAmount().add(request.getAmount());
-        if (newPaidAmount.compareTo(reservation.getTotalAmount()) > 0) {
-            throw new IllegalArgumentException(
-                    "Payment exceeds remaining balance of " + reservation.getBalanceAmount());
-        }
-
-        reservation.setPaidAmount(newPaidAmount);
-        reservation.setBalanceAmount(reservation.getTotalAmount().subtract(newPaidAmount));
-        reservation.setPaymentStatus(resolvePaymentStatus(newPaidAmount, reservation.getTotalAmount()));
-        reservationRepository.save(reservation);
-
-        log.info("Payment added to reservation id={}: amount={}, paymentStatus={}",
-                id, request.getAmount(), reservation.getPaymentStatus());
-        return reservationMapper.toDto(reservation);
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public InvoiceResponseDto getInvoice(Long id) {
         Reservations reservation = findById(id);
@@ -302,6 +278,16 @@ public class ReservationServiceImpl implements ReservationService {
                         .build())
                 .toList();
 
+        List<InvoiceResponseDto.PaymentLineDto> paymentLines = reservation.getActivePayments().stream()
+                .map(p -> InvoiceResponseDto.PaymentLineDto.builder()
+                        .id(p.getId())
+                        .paymentMethod(p.getPaymentMethod())
+                        .paymentType(p.getPaymentType())
+                        .amount(p.getAmount())
+                        .paymentDate(p.getPaymentDate())
+                        .build())
+                .toList();
+
         return InvoiceResponseDto.builder()
                 .reservationId(reservation.getId())
                 .generatedAt(LocalDateTime.now())
@@ -319,6 +305,7 @@ public class ReservationServiceImpl implements ReservationService {
                         .reduce(BigDecimal.ZERO, BigDecimal::add))
                 .serviceCharges(serviceLines)
                 .serviceChargeTotal(reservation.getServiceChargeTotal())
+                .payments(paymentLines)
                 .totalAmount(reservation.getTotalAmount())
                 .paidAmount(reservation.getPaidAmount())
                 .balanceAmount(reservation.getBalanceAmount())
@@ -377,11 +364,5 @@ public class ReservationServiceImpl implements ReservationService {
             return promotion.getDiscountValue().min(basePrice);
         }
         return BigDecimal.ZERO;
-    }
-
-    private PaymentStatus resolvePaymentStatus(BigDecimal paid, BigDecimal total) {
-        if (paid.compareTo(BigDecimal.ZERO) == 0) return PaymentStatus.UNPAID;
-        if (paid.compareTo(total) >= 0) return PaymentStatus.PAID;
-        return PaymentStatus.PARTIAL;
     }
 }

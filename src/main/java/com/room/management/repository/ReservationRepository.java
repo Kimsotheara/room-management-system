@@ -1,11 +1,13 @@
 package com.room.management.repository;
 
 import com.room.management.entity.room.Reservations;
+import com.room.management.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +32,46 @@ public interface ReservationRepository extends JpaRepository<Reservations, Long>
             WHERE r.id = :id
             """)
     Optional<Reservations> findByIdWithDetails(@Param("id") Long id);
+
+    // ── Report queries ──────────────────────────────────────────────────────────
+
+    @Query("SELECT r.status, COUNT(r) FROM Reservations r WHERE r.isActive = true GROUP BY r.status")
+    List<Object[]> countActiveByStatus();
+
+    @Query("""
+            SELECT COUNT(r) FROM Reservations r
+            WHERE r.isActive = true
+              AND r.checkInDate >= :start AND r.checkInDate < :end
+              AND r.status = com.room.management.enums.ReservationStatus.CHECKED_IN
+            """)
+    long countTodayCheckIns(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("""
+            SELECT COUNT(r) FROM Reservations r
+            WHERE r.isActive = true
+              AND r.checkOutDate >= :start AND r.checkOutDate < :end
+              AND r.status = com.room.management.enums.ReservationStatus.CHECKED_OUT
+            """)
+    long countTodayCheckOuts(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COUNT(r) FROM Reservations r WHERE r.isActive = true AND r.paymentStatus IN :statuses")
+    long countByPaymentStatuses(@Param("statuses") List<PaymentStatus> statuses);
+
+    @Query("""
+            SELECT SUM(r.totalAmount), SUM(r.paidAmount), SUM(r.balanceAmount), SUM(r.serviceChargeTotal)
+            FROM Reservations r
+            WHERE r.isActive = true
+              AND r.status != com.room.management.enums.ReservationStatus.CANCELLED
+              AND r.checkInDate >= :from AND r.checkInDate < :to
+            """)
+    List<Object[]> revenueByDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("""
+            SELECT r.status, COUNT(r)
+            FROM Reservations r
+            WHERE r.isActive = true
+              AND r.checkInDate >= :from AND r.checkInDate < :to
+            GROUP BY r.status
+            """)
+    List<Object[]> countByStatusInDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }
